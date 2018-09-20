@@ -2,6 +2,8 @@
 
 The **Azure IoT TypeEdge** introduces a strongly-typed flavor of the inherently loosely coupled vanilla [Azure IoT Edge](https:/azure.microsoft.com/en-us/services/iot-edge/).
 
+>Note: This is an experimental repo, with high chances of being discontinued
+
 Specifically, **TypeEdge**:
 
 - Removes all configuration burden from an IoT Edge application, because configuration can be now automatically generated.
