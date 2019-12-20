@@ -24,7 +24,11 @@ namespace Microsoft.Azure.TypeEdge
     {
         public static TypeModule Module { get; set; }
 
-        public static async Task DockerEntryPoint(string[] args)
+        public static async Task DockerEntryPoint(string[] args) : this(args, null)
+        {
+        }
+
+        public static async Task DockerEntryPoint(string[] args, Action<ContainerBuilder> registerServices)
         {
             var cancellationTokenSource = new CancellationTokenSource();
             AssemblyLoadContext.Default.Unloading += ctx => cancellationTokenSource.Cancel();
@@ -33,6 +37,12 @@ namespace Microsoft.Azure.TypeEdge
             var services = new ServiceCollection().AddLogging();
             var containerBuilder = new ContainerBuilder();
             containerBuilder.Populate(services);
+
+            if(registerServices != null)
+            {
+                registerServices(containerBuilder);
+            }
+            
             containerBuilder.RegisterBuildCallback(c => { });
 
             var configuration = new ConfigurationBuilder()

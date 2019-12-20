@@ -183,14 +183,19 @@ namespace Microsoft.Azure.TypeEdge.Host
                 GetModuleConnectionStringAsync(_iotHubConnectionString, _deviceId, _modules[0].Name)
                     .Result;
 
+            var transportSettings = 
+                _container.ResolveOptionalNamed<ITransportSettings>(nameof(TypeEdgeHost) + "TransportSettings")
+                ?? _container.ResolveOptional<ITransportSettings>()
+                ?? new AmqpTransportSettings(TransportType.Amqp_Tcp_Only)
+                {
+                    RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true,
+                    OpenTimeout = new TimeSpan(1)
+                };
+
             var tmpClient = ModuleClient.CreateFromConnectionString(moduleConnectionString,
                 new ITransportSettings[]
                 {
-                    new AmqpTransportSettings(TransportType.Amqp_Tcp_Only)
-                    {
-                        RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true,
-                        OpenTimeout = new TimeSpan(1)
-                    }
+                    transportSettings
                 }
             );
 
@@ -522,6 +527,27 @@ namespace Microsoft.Azure.TypeEdge.Host
         {
             _containerBuilder.RegisterInstance(instance);
         }
+
+       public void RegisterTransportSettings(ITransportSettings transportSettings)
+       {
+           _containerBuilder.RegisterInstance(instance);
+       }
+
+       public void RegisterTransportSettingsForHost(ITransportSettings transportSettings)
+       {
+           _containerBuilder.RegisterInstance(instance).Named<ITransportSettings>(nameof(TypeEdgeHost) + "TransportSettings");
+       }
+
+       public void RegisterTransportSettingsForModule<T>(ITransportSettings transportSettings)
+       {
+           this.RegisterTransportSettingsForModule(transportSettings, typeof(T));
+       }
+
+       public void RegisterTransportSettingsForModule(ITransportSettings transportSettings, Type moduleType)
+       {
+           var moduleName = moduleType.GetProxyInterface().GetModuleName();
+           _containerBuilder.RegisterInstance(instance).Named<ITransportSettings>(moduleName + "TransportSettings");
+       }
 
         #endregion
     }

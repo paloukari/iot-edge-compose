@@ -137,7 +137,12 @@ namespace Microsoft.Azure.TypeEdge.Modules
             if (string.IsNullOrEmpty(_connectionString))
                 Logger.LogWarning($"Missing {Constants.EdgeHubConnectionStringKey} variable.");
 
-            var settings = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only);
+
+            var settings =  
+                container.ResolveOptionalNamed<ITransportSettings>(Name + "TransportSettings")
+                ?? container.ResolveOptional<ITransportSettings>()
+                ?? new AmqpTransportSettings(TransportType.Amqp_Tcp_Only);
+           
             var disableSslCertificateValidationKey =
                 configuration.GetValue($"{Constants.DisableSslCertificateValidationKey}", false);
 
@@ -299,7 +304,7 @@ namespace Microsoft.Azure.TypeEdge.Modules
                     throw new ArgumentException(
                         $"{GetType().Name} has needs to implement an single interface annotated with the TypeModule Attribute");
 
-                return proxyInterface.Name.Substring(1).ToLower(CultureInfo.CurrentCulture);
+                return proxyInterface.GetModuleName();
             }
         }
 
