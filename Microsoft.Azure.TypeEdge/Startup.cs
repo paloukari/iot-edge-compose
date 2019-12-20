@@ -24,8 +24,9 @@ namespace Microsoft.Azure.TypeEdge
     {
         public static TypeModule Module { get; set; }
 
-        public static async Task DockerEntryPoint(string[] args) : this(args, null)
+        public static Task DockerEntryPoint(string[] args)
         {
+            return DockerEntryPoint(args, null);
         }
 
         public static async Task DockerEntryPoint(string[] args, Action<ContainerBuilder> registerServices)

@@ -530,12 +530,12 @@ namespace Microsoft.Azure.TypeEdge.Host
 
        public void RegisterTransportSettings(ITransportSettings transportSettings)
        {
-           _containerBuilder.RegisterInstance(instance);
+           _containerBuilder.RegisterInstance(transportSettings);
        }
 
        public void RegisterTransportSettingsForHost(ITransportSettings transportSettings)
        {
-           _containerBuilder.RegisterInstance(instance).Named<ITransportSettings>(nameof(TypeEdgeHost) + "TransportSettings");
+           _containerBuilder.RegisterInstance(transportSettings).Named<ITransportSettings>(nameof(TypeEdgeHost) + "TransportSettings");
        }
 
        public void RegisterTransportSettingsForModule<T>(ITransportSettings transportSettings)
@@ -546,7 +546,7 @@ namespace Microsoft.Azure.TypeEdge.Host
        public void RegisterTransportSettingsForModule(ITransportSettings transportSettings, Type moduleType)
        {
            var moduleName = moduleType.GetProxyInterface().GetModuleName();
-           _containerBuilder.RegisterInstance(instance).Named<ITransportSettings>(moduleName + "TransportSettings");
+           _containerBuilder.RegisterInstance(transportSettings).Named<ITransportSettings>(moduleName + "TransportSettings");
        }
 
         #endregion

@@ -138,18 +138,13 @@ namespace Microsoft.Azure.TypeEdge.Modules
                 Logger.LogWarning($"Missing {Constants.EdgeHubConnectionStringKey} variable.");
 
 
-            var settings =  
+            var settings =
                 container.ResolveOptionalNamed<ITransportSettings>(Name + "TransportSettings")
                 ?? container.ResolveOptional<ITransportSettings>()
-                ?? new AmqpTransportSettings(TransportType.Amqp_Tcp_Only);
-           
-            var disableSslCertificateValidationKey =
-                configuration.GetValue($"{Constants.DisableSslCertificateValidationKey}", false);
+                ?? DefaultTransport(configuration);
 
-            if (disableSslCertificateValidationKey)
-                settings.RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
-                    true;
-            _transportSettings = new ITransportSettings[] {settings};
+
+            _transportSettings = new ITransportSettings[] { settings };
 
             return Init();
         }
@@ -371,6 +366,20 @@ namespace Microsoft.Azure.TypeEdge.Modules
         #endregion
 
         #region private methods
+
+        private static ITransportSettings DefaultTransport(IConfigurationRoot configuration)
+        {
+            var settings = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only);
+
+            var disableSslCertificateValidationKey = configuration.GetValue($"{Constants.DisableSslCertificateValidationKey}", false);
+
+            if (disableSslCertificateValidationKey)
+            {
+                settings.RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>  true;
+            }
+
+            return settings;
+        }
 
         private Task<MethodResponse> MethodCallback(MethodRequest methodRequest, object userContext)
         {
